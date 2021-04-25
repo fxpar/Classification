@@ -20,13 +20,11 @@ Helps memorizing because trying to find links is a great way to fix topic and re
 4. CREATIVITY: A set of empty cards can be used to add new topics by the students
 5. Would be great to be able to reuse the deck, augmented by students additions, for next activity
 
-## Examples
+# Examples
+* Countries https://codepen.io/frapar/full/gOgqMZp
+* Questions (in french) https://codepen.io/frapar/full/ExZrwqX
 
-![countries start](https://github.com/fxpar/Classification/blob/main/assets/screenshots/countriesStart.mp4)
-
-https://github.com/fxpar/Classification/blob/main/assets/screenshots/countriesStart.mp4
-
-
+## Educational scenario
 ### Animals (step 1)
 > With your team buddy, organize these animals in 2 groups
 
@@ -44,6 +42,6 @@ Helps discover the set of animals.
 > Add an empty card to each group and write on it the name of another animal you think about and could be in this group
 
 ### Animals (step 2)
-> Use the deck (including the animals you added) to try and organize in categories and sub-categories
+> Use the deck (including the animals you added *not yet implemented*) to try and organize in categories and sub-categories
 
 
