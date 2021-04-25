@@ -15,10 +15,27 @@ Helps memorizing because trying to find links is a great way to fix topic and re
 2. ORGANIZING: Cards can be grouped when droped on top of one another
 3. NAMING: Names can be given to cards / groups
 4. CREATIVITY: A set of empty cards can be used to add new topics by the students
+5. Would be great to be able to reuse the deck, augmented by students additions, for next activity
 
-## Example
+## Examples
 
-### Countries (step 1)
-> With your team buddy, organize these countries in 2 groups
+### Animals (step 1)
+> With your team buddy, organize these animals in 2 groups
+
 This is a guided question, with a precise number of grouping. (better as a first step than a free grouping).
-Helps discover the set of countries.
+Helps discover the set of animals.
+
+> Try giving a name to each group
+
+* with legs / without
+* with wings
+* eggs or not
+* on earth or water (what about in between?)
+* eat meat or not
+
+> Add an empty card to each group and write on it the name of another animal you think about and could be in this group
+
+### Animals (step 2)
+> Use the deck (including the animals you added) to try and organize in categories and sub-categories
+
+
