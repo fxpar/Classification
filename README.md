@@ -24,6 +24,10 @@ Helps memorizing because trying to find links is a great way to fix topic and re
 
 # Examples
 * Countries https://codepen.io/frapar/full/gOgqMZp
+
+![image](https://user-images.githubusercontent.com/11584406/115981088-94c96680-a591-11eb-8a31-0e9e32f260fa.png)
+
+
 * Questions (in french) https://codepen.io/frapar/full/ExZrwqX
 
 ## Educational scenario
