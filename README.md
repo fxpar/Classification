@@ -3,7 +3,7 @@ https://user-images.githubusercontent.com/11584406/115980568-00113980-a58e-11eb-
 
 # Classification
 Educational classification game activity project. (no right / wrong)
-Proof of concept for a possible future H5P activity.
+Proof of concept for an [H5P activity request](https://h5p.org/node/1148270).
 *(Check the technicals below for details)*
 
 ## Purpose
@@ -30,6 +30,7 @@ Helps memorizing because trying to find links is a great way to fix topic and re
 
 * Questions (in french) https://codepen.io/frapar/full/ExZrwqX
 
+
 ## Educational scenario
 ### Animals (step 1)
 > With your team buddy, organize these animals in 2 groups
@@ -52,9 +53,13 @@ Helps discover the set of animals.
 
 
 # Technical aspects
+
 ## Pros
 This solution uses fieldset which looks quite ok.
+
 ## Cons
 I used the fieldset of the destination card as group legend... which make impossible to ungroup this card.
+
 ## Improvement needed
 Make the groups by adding a fieldset independant from the cards
+
