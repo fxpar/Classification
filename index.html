@@ -10,7 +10,7 @@
 	
 	<style>
 		
-	fieldset.decked {
+	#deck fieldset {
 		position:fixed;
 		top:10px;
 		left:50%;
@@ -25,10 +25,27 @@
 		float:right;
 	}
 	
-	fieldset.alone, fieldset.parent {
+	#menubar {
+		background:aliceblue;
+	}
+	
+	#menubar button {
+		display:inline-block;
+		padding:10px;
+		margin:5px;
+		text-align:center;
+		border:1px solid lightgrey;
+		width:5%;
+	}
+	
+	#area fieldset {
 		float:left;
 		position:relative;
 	}
+	
+	#area fieldset fieldset{
+	
+}
 	
 	.card {
 		border:1px solid lightgrey;
@@ -52,11 +69,11 @@
 		background:white;
 	}
 
-	fieldset.decked legend {
+	#deck fieldset legend {
 		display:none !important;
 	}
 	
-	fieldset.parent legend, fieldset.alone legend {
+	#area fieldset legend  {
 		display:block;
 		font-weight:bold;
 		font-size:bigger;
@@ -65,15 +82,8 @@
 		background:purple;
     color:white;
 	}
-	fieldset.child legend {
-		display:none;
-	}
-	fieldset.child {
-		border:0px solid white;
-    float:left;
-		padding-top:0px;
-		margin-top:0px;
-	}
+
+
 	
 	
 	</style>
@@ -81,33 +91,113 @@
 	
 	<script>
 	
-			var moved; // element being moved. Set by drag();
+	var moved; // element being moved. Set by drag();
 		var from; // parent of the moved element. Set by drag();
+		var dest;
+		var area;
+		var backupDeck;
+		var backupArea;
+		var droping;
+		var deck;
 		
-function changeClass(dest){
+		function initiate(){
+			area = document.getElementById("area");
+			deck = document.getElementById("deck");
+		
+		}
+		
+function undo(){
+	deckParent = deck.parentNode;
+	areaParent = area.parentNode;
+	deckParent.replaceChild(backupDeck, deck);
+	areaParent.replaceChild(backupArea, area);
+	
+	// redefine deck and area with new elements
 	area = document.getElementById("area");
-	if (dest === area) {
-		moved.className = "alone";
-		console.log ("moved id:"+moved.id+" now class: alone");
-	}else{
-		dest.className = "parent";
-		console.log ("dest id:"+dest.id+" now class: parent");
-		moved.className = "child";
-		console.log ("moved:"+moved.id+" now class: child");
-	};
-	fromF = from.querySelector("fieldset");
-	console.log(fromF);
-	if (fromF === null) {
-		from.className = "alone";
-	}else{
-		from.className = "parent";
-	}
-}		
+	deck = document.getElementById("deck");
+}
+
+
+/*
+*  dipsplay color around dest target
+*/
+function dragenter(ev){
+	console.log("entering:"+ev.target.nodeName+" id="+ev.target.id);
+	if (ev.target.style !== "undefined") ev.target.style.border = "thick solid #0000FF";
+}
+
+/*
+* cancel the color around the dest target (back to grey)
+*/
+function dragleave(ev){
+	
+	if (ev.target.style !== "undefined") ev.target.style.border = "1px solid lightgrey";
+}
+
+function restoreColor(dest){
+	
+	dest.style.border = "1px solid lightgrey";
+}
+
+	
+	
 function allowDrop(ev) {
   ev.preventDefault();
 }
 
+function deleteEmptyFieldset(){
+	//emptyFieldset = area.querySelectorAll(":scope > Fieldset span");
+	//console.log("empty fieldset: "+emptyFieldset.length);
+	
+	fieldsets = area.querySelectorAll(":scope Fieldset");
+	console.log(fieldsets);
+	console.log("fieldsets.length:"+fieldsets.length);
+	for (i = 0; i < fieldsets.length; i++){
+		console.log("i="+i);
+		spans = fieldsets[i].querySelectorAll(":scope span");
+		if (spans.length === 0) {
+		console.log("removing fieldset id:"+fieldsets[i].id);
+		fieldsets[i].remove();
+		}
+	}
+	
+}
+
+
+function addFieldset(dest) {
+	console.log("addFieldset destination:");
+	console.log(dest);
+	
+	// si dest = fieldset pas de nouveau fieldset
+	// et class de tous les fieldset enfants = child
+	// sinon nouveau filedset et class de tous les enfants = child
+	
+	var numFieldsetChildren = dest.querySelectorAll(":scope > Fieldset");
+	console.log("numFieldsetChildren longueur"+numFieldsetChildren.length)
+	
+	<!-- if (dest.nodeName =="FIELDSET" && numFieldsetChildren.length >1){ -->
+	if (dest.nodeName == "FIELDSET" && numFieldsetChildren.length >0 ){
+		console.log("dest.nodeName:"+dest.nodeName);
+		console.log ("addfieldset == FIELDSET");
+		return dest;
+	}else {
+		console.log("addfieldset autre");
+		console.log("dest.nodeName:"+dest.nodeName);
+		var uid = new Date().getTime();
+		var oClone = document.getElementById("template").cloneNode(true);
+		oClone.id = (uid + "");
+		dest.appendChild(oClone);
+		return oClone;
+	
+	}
+	
+}
+
+
+
 function drag(ev) {
+	backupDeck = document.getElementById("deck").cloneNode(true);
+	backupArea = document.getElementById("area").cloneNode(true);
 	moved = ev.target;
 	from = ev.target.parentNode;
 	console.log("startDRAG");
@@ -118,30 +208,62 @@ function drag(ev) {
 }
 
 function drop(ev) {
+	restoreColor(ev.target);
+	// évite le bubble effet qui relance drop(ev) pour chaque parent.
+	ev.stopPropagation();
+	dest = ev.target;
 	console.log("startDROP");
-	
 	console.log(ev);
+	
+	// autorise le drop
   ev.preventDefault();
   
+  //on récupére
   var data = ev.dataTransfer.getData("text");
+  
+  // si la destination est area alors on met le parent à area pour ne pas remonter plus haut
+    if (ev.target === area){
+	destParent = area;
+  }else{
+	destParent = ev.target.parentNode;
+  }
+  
+	if (from === deck && dest === area) {
+		area.appendChild(document.getElementById(data));
+	}else{
+	  // clone le template et ajoute le fieldset au parent
+	  console.log("Before addfield: destParent.nodeName:"+destParent.nodeName);
+	  destFieldset = addFieldset(destParent);
+	  
+	  // ajoute la destination et la source au fieldset
+	  // @todo exception si la destination est area
+	 destFieldset.appendChild(document.getElementById(data));
+	 if (ev.target !== area) destFieldset.appendChild(ev.target);
+	 }
+	 deleteEmptyFieldset();
+	  
+	 
+	  /*
   if (ev.target.nodeName == "SPAN" || ev.target.nodeName == "LEGEND"){
 	console.log("forbid drop in span or legend=> drop in parent "+ev.target.parentNode.nodeName+" id:"+ev.target.parentNode.id);
 	
    ev.target.parentNode.appendChild(document.getElementById(data));
-   changeClass(ev.target.parentNode);
+   //changeClass(ev.target.parentNode);
    }else{
 	console.log("Drop into:"+ev.target.nodeName);
   ev.target.appendChild(document.getElementById(data));
-  changeClass(ev.target);
+  //changeClass(ev.target);
   }
-  
+  */
+ 
+
 }
 	
 	</script>
 	
 </head>
 
-<body>
+<body onload="initiate();">
 	<h1>Classification activity</h1>
 STEP 1 - ORGANIZATION
 	<ul>
@@ -158,59 +280,59 @@ STEP 2 - CREATIVITY
 	<br clear="both"/>
 	<div id="deck">
     
-        <fieldset class="decked" id="field0-1" draggable="true" style="cursor:move" ondrop="drop(event);"  ondragover="allowDrop(event)"  ondragstart="drag(event)">
+        <fieldset class="decked" id="field0-1" draggable="true" style="cursor:move" ondrop="drop(event);"  ondragover="allowDrop(event)" ondragenter="dragenter(event)" ondragleave="dragleave(event)"  ondragstart="drag(event)">
 			<legend contenteditable="true">Rename me</legend>
 			<span class="card" style="background:white;" contenteditable="true">⭐</span>
 		</fieldset>
     
-    <fieldset class="decked" id="field0-2" draggable="true" style="cursor:move" ondrop="drop(event);"  ondragover="allowDrop(event)"  ondragstart="drag(event)">
+    <fieldset class="decked" id="field0-2" draggable="true" style="cursor:move" ondrop="drop(event);"  ondragover="allowDrop(event)" ondragenter="dragenter(event)" ondragleave="dragleave(event)"  ondragstart="drag(event)">
 			<legend contenteditable="true">Rename me</legend>
 			<span class="card" style="background:white;" contenteditable="true">⭐</span>
 		</fieldset>
     
-    <fieldset class="decked" id="field0-3" draggable="true" style="cursor:move" ondrop="drop(event);"  ondragover="allowDrop(event)"  ondragstart="drag(event)">
+    <fieldset class="decked" id="field0-3" draggable="true" style="cursor:move" ondrop="drop(event);"  ondragover="allowDrop(event)" ondragenter="dragenter(event)" ondragleave="dragleave(event)"  ondragstart="drag(event)">
 			<legend contenteditable="true">Rename me</legend>
 			<span class="card" style="background:white;" contenteditable="true">⭐</span>
 		</fieldset>
     
-    <fieldset class="decked" id="field0-4" draggable="true" style="cursor:move" ondrop="drop(event);"  ondragover="allowDrop(event)"  ondragstart="drag(event)">
+    <fieldset class="decked" id="field0-4" draggable="true" style="cursor:move" ondrop="drop(event);"  ondragover="allowDrop(event)" ondragenter="dragenter(event)" ondragleave="dragleave(event)"  ondragstart="drag(event)">
 			<legend contenteditable="true">Rename me</legend>
 			<span class="card" style="background:white;" contenteditable="true">⭐</span>
 		</fieldset>
     
     
-		<fieldset class="decked" id="field1" draggable="true" style="cursor:move;"  ondrop="drop(event);"  ondragover="allowDrop(event)"   ondragstart="drag(event)" >
+		<fieldset class="decked" id="field1" draggable="true" style="cursor:move;"  ondrop="drop(event);"  ondragover="allowDrop(event)" ondragenter="dragenter(event)" ondragleave="dragleave(event)"   ondragstart="drag(event)" >
 					<legend contenteditable="true">Rename me</legend>
 					<span class="card" style="background:white;">France</span>
 				</fieldset>
-		<fieldset class="decked" id="field2" draggable="true" style="cursor:move" ondrop="drop(event);"  ondragover="allowDrop(event)"  ondragstart="drag(event)">
+		<fieldset class="decked" id="field2" draggable="true" style="cursor:move" ondrop="drop(event);"  ondragover="allowDrop(event)" ondragenter="dragenter(event)" ondragleave="dragleave(event)"  ondragstart="drag(event)">
 			<legend contenteditable="true">Rename me</legend>
 			<span class="card" style="background:white;">England</span>
 		</fieldset>
 		
 		
-		<fieldset class="decked" id="field3" draggable="true" style="cursor:move" ondrop="drop(event);"  ondragover="allowDrop(event)"  ondragstart="drag(event)">
+		<fieldset class="decked" id="field3" draggable="true" style="cursor:move" ondrop="drop(event);"  ondragover="allowDrop(event)" ondragenter="dragenter(event)" ondragleave="dragleave(event)"  ondragstart="drag(event)">
 			<legend contenteditable="true">Rename me</legend>
 			<span class="card" style="background:white;">Australia</span>
 		</fieldset>
 		
-		<fieldset class="decked" id="field4" draggable="true" style="cursor:move" ondrop="drop(event);"  ondragover="allowDrop(event)"  ondragstart="drag(event)">
+		<fieldset class="decked" id="field4" draggable="true" style="cursor:move" ondrop="drop(event);"  ondragover="allowDrop(event)" ondragenter="dragenter(event)" ondragleave="dragleave(event)"  ondragstart="drag(event)">
 			<legend contenteditable="true">Rename me</legend>
 			<span class="card" style="background:white;">Japan</span>
 		</fieldset>
 		
 		
-		<fieldset class="decked" id="field5" draggable="true" style="cursor:move" ondrop="drop(event);"  ondragover="allowDrop(event)"  ondragstart="drag(event)">
+		<fieldset class="decked" id="field5" draggable="true" style="cursor:move" ondrop="drop(event);"  ondragover="allowDrop(event)" ondragenter="dragenter(event)" ondragleave="dragleave(event)"  ondragstart="drag(event)">
 			<legend contenteditable="true">Rename me</legend>
 			<span class="card" style="background:white;">India</span>
 		</fieldset>
 		
-		<fieldset class="decked" id="field6" draggable="true" style="cursor:move" ondrop="drop(event);"  ondragover="allowDrop(event)"  ondragstart="drag(event)">
+		<fieldset class="decked" id="field6" draggable="true" style="cursor:move" ondrop="drop(event);"  ondragover="allowDrop(event)" ondragenter="dragenter(event)" ondragleave="dragleave(event)"  ondragstart="drag(event)">
 			<legend contenteditable="true">Rename me</legend>
 			<span class="card" style="background:white;">Germany</span>
 		</fieldset>
 		
-		<fieldset class="decked" id="field7" draggable="true" style="cursor:move" ondrop="drop(event);"  ondragover="allowDrop(event)"  ondragstart="drag(event)">
+		<fieldset class="decked" id="field7" draggable="true" style="cursor:move" ondrop="drop(event);"  ondragover="allowDrop(event)" ondragenter="dragenter(event)" ondragleave="dragleave(event)"  ondragstart="drag(event)">
 			<legend contenteditable="true">Rename me</legend>
 			<span class="card" style="background:white;">New Zealand</span>
 		</fieldset>
@@ -220,8 +342,18 @@ STEP 2 - CREATIVITY
 		
 	</div>
 			
+
+		
+		
+	<div id="menubar"><button id="undobtn" onclick="undo()" title="undo / annuler">↩</button><button  id="savebtn" title="download as list / télécharger la liste">⤵</button><button id="savebtn" title="charger / uploader">⤴</button></div>
 		<div id="area"  ondrop="drop(event);" ondragover="allowDrop(event);">&nbsp;
 		
+		</div>
+		
+		<div style="display:none">
+			<fieldset class="" id="template" draggable="true" style="cursor:move" ondrop="drop(event);"  ondragover="allowDrop(event)"  ondragstart="drag(event)" ondragenter="dragenter(event)" ondragleave="dragleave(event)">
+			<legend contenteditable="true">Rename me</legend>
+		</fieldset>
 		</div>
 </body>
 </html>
