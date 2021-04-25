@@ -3,6 +3,8 @@ https://user-images.githubusercontent.com/11584406/115980568-00113980-a58e-11eb-
 
 # Classification
 Educational classification game activity project. (no right / wrong)
+Proof of concept for a possible future H5P activity.
+*(Check the technicals below for details)*
 
 ## Purpose
 Before learning theories, student need to get accustomed with the material. 
@@ -45,3 +47,10 @@ Helps discover the set of animals.
 > Use the deck (including the animals you added *not yet implemented*) to try and organize in categories and sub-categories
 
 
+# Technical aspects
+## Pros
+This solution uses fieldset which looks quite ok.
+## Cons
+I used the fieldset of the destination card as group legend... which make impossible to ungroup this card.
+## Improvement needed
+Make the groups by adding a fieldset independant from the cards
