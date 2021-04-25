@@ -18,7 +18,7 @@ Helps memorizing because trying to find links is a great way to fix topic and re
 5. Would be great to be able to reuse the deck, augmented by students additions, for next activity
 
 ## Examples
-https://github.com/fxpar/Classification/blob/main/assets/screenshots/countriesStart.mp4
+![countries start](https://github.com/fxpar/Classification/blob/main/assets/screenshots/countriesStart.mp4)
 
 ### Animals (step 1)
 > With your team buddy, organize these animals in 2 groups
