@@ -14,7 +14,7 @@
 		background:aliceblue;
 	}
 	
-	#menubar button {
+	#menubar button, .inputfile + label {
 		display:inline-block;
 		padding:10px;
 		margin:5px;
@@ -96,6 +96,19 @@
 		margin-top:0px;
 	}
 	
+.inputfile {
+	width: 0.1px;
+	height: 0.1px;
+	opacity: 0;
+	overflow: hidden;
+	position: absolute;
+	z-index: -1;
+}
+
+.inputfile + label {
+   
+}
+
 
 	
 	</style>
@@ -115,9 +128,59 @@
 		function initiate(){
 			area = document.getElementById("area");
 			deck = document.getElementById("deck");
-		
+			playarea = document.getElementById("playarea");
+			
 		}
 	
+	/**
+	* source Carlo Delgado
+	* https://ourcodeworld.com/articles/read/189/how-to-create-a-file-and-generate-a-download-with-javascript-in-the-browser-without-a-server
+	**/
+	function download(filename, text) {
+	  var element = document.createElement('a');
+	  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+	  element.setAttribute('download', filename);
+
+	  element.style.display = 'none';
+	  document.body.appendChild(element);
+
+	  element.click();
+
+	  document.body.removeChild(element);
+	}
+
+// Start file download.
+
+	
+	function exportArea(){
+		var html = playarea.outerHTML;
+		var data = { html: html }; 
+		var json = JSON.stringify(data);
+		var uid = new Date().getTime();
+		download("playarea"+uid+".html",html);
+	}
+	
+	
+	
+	
+async function importArea(event){
+		
+		  const fileSelector = document.getElementById('uploadbtn');
+		  fileSelector.addEventListener('change',async (event) => {
+			const fileList = event.target.files;
+			console.log(fileList);
+			let mytext = await fileList.item(0).text();
+			console.log(fileList.item(0).text());
+			
+			
+			 document.getElementById('playarea').innerHTML = mytext;
+			
+		  });
+		 
+		 
+		 initiate();
+
+	}
 	
 	
 function deleteClass(sel,cl){
@@ -249,7 +312,7 @@ STEP 2 - CREATIVITY
   <li>the cards are editable (you can keep the star to recognize them as your own or change the symbol)</li>
 </ul>
 	<br clear="both"/>
-		
+	<div id="playarea">
 			<div id="deck">
     
         <fieldset class="decked" id="field0-1" draggable="true" style="cursor:move" ondrop="drop(event);"  ondragover="allowDrop(event)"  ondragstart="drag(event)" ondragenter="dragenter(event)" ondragleave="dragleave(event)" >
@@ -315,14 +378,16 @@ STEP 2 - CREATIVITY
 	</div>
 		
 	<br clear="both"/>
-	<div id="menubar"><button id="undobtn" onclick="undo()" title="undo / annuler">↩</button><button  id="savebtn" title="download as list / télécharger la liste">⤵</button><button id="savebtn" title="charger / uploader">⤴</button></div>
+	<div id="menubar"><button id="undobtn" onclick="undo()" title="undo / annuler">↩</button>
+	<button  id="savebtn" title="download a backup / télécharger une sauvegarde" onclick="exportArea();">⤵</button>
+	<input type="file" id="uploadbtn" name="uploadbtn" class="inputfile" title="charger / uploader" onclick="importArea(event);"/>
+	<label id="inputfilelabel" for="uploadbtn" title="restore from a saved backup / restaurer à partir d'une sauvegarde">⤴</label>
+	</div>
+		<div id="areazone">
+			<div id="area"  ondrop="drop(event);" ondragover="allowDrop(event);">&nbsp;
 			
-		<div id="area"  ondrop="drop(event);" ondragover="allowDrop(event);">&nbsp;
-		
-
-		
-		
-		</div>
-
+			</div><!-- fin area	 -->
+		</div> <!-- fin areazone	 -->
+	</div><!-- fin playarea	 -->
 </body>
 </html>
