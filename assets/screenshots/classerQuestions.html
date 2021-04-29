@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<title>Améliorez vos questions</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="description" content="Démo d'une activité de coaching (idéalement pour intégration dans H5P)" />
+	<meta name="keywords" content="" />
+	<meta name="robots" content="index,follow" />
+	<link rel="stylesheet" type="text/css" href="styles.css" />
+	
+	<style>
+	
+	body {
+		
+		}
+	
+		#menubar {
+		background:aliceblue;
+	}
+	
+	#menubar button, .inputfile + label {
+		display:inline-block;
+		padding:10px;
+		margin:5px;
+		text-align:center;
+		border:1px solid lightgrey;
+		width:5%;
+	}
+			
+	fieldset.decked {
+		position:absolute;
+		top:10px;
+		left:10px;
+		z-index:1;
+    background:purple;
+    text-align:center;
+    vertical-align:middle;
+	}
+	
+	#deck{
+		position:relative;
+		height:155px;
+	}
+	
+	fieldset.alone, fieldset.parent {
+		float:left;
+		position:relative;
+	}
+	
+	.card {
+		border:1px solid lightgrey;
+		padding:10px;
+		margin: 10px;
+		width:100px;
+		height:100px;
+		display:inline-block;
+		overflow:wrap;
+    text-align:center;
+    vertical-align:middle;
+	}
+	
+		
+	#area {
+		background:green;
+		border:1px solid grey;
+		min-height:500px;
+		width:100%;
+		display:table;
+		
+	}
+	fieldset{
+		background:white;
+	}
+	
+	.highlighted{
+		border:thick solid #0000FF;
+	}
+	
+
+	fieldset.decked legend {
+		display:none !important;
+	}
+	
+	fieldset.parent legend, fieldset.alone legend {
+		display:block;
+		font-weight:bold;
+		font-size:bigger;
+		padding:10px;
+		margin:10px;
+		background:purple;
+    color:white;
+	}
+	fieldset.child legend {
+		display:none;
+	}
+	fieldset.child {
+		border:0px solid white;
+		float:left;
+		padding-top:0px;
+		margin-top:0px;
+	}
+	
+.inputfile {
+	width: 0.1px;
+	height: 0.1px;
+	opacity: 0;
+	overflow: hidden;
+	position: absolute;
+	z-index: -1;
+}
+
+.inputfile + label {
+   
+}
+
+
+	
+	</style>
+	
+	
+	<script>
+	
+		var moved; // element being moved. Set by drag();
+		var from; // parent of the moved element. Set by drag();
+		var dest;
+		var area;
+		var backupDeck;
+		var backupArea;
+		var droping;
+		var deck;
+		
+		function initiate(){
+			area = document.getElementById("area");
+			deck = document.getElementById("deck");
+			playarea = document.getElementById("playarea");
+			
+		}
+	
+	/**
+	* source Carlo Delgado
+	* https://ourcodeworld.com/articles/read/189/how-to-create-a-file-and-generate-a-download-with-javascript-in-the-browser-without-a-server
+	**/
+	function download(filename, text) {
+	  var element = document.createElement('a');
+	  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+	  element.setAttribute('download', filename);
+
+	  element.style.display = 'none';
+	  document.body.appendChild(element);
+
+	  element.click();
+
+	  document.body.removeChild(element);
+	}
+
+// Start file download.
+
+	
+	function exportArea(){
+		var html = playarea.outerHTML;
+		var data = { html: html }; 
+		var json = JSON.stringify(data);
+		var uid = new Date().getTime();
+		download("playarea"+uid+".html",html);
+	}
+	
+	
+	
+	
+async function importArea(event){
+		
+		  const fileSelector = document.getElementById('uploadbtn');
+		  fileSelector.addEventListener('change',async (event) => {
+			const fileList = event.target.files;
+			console.log(fileList);
+			let mytext = await fileList.item(0).text();
+			console.log(fileList.item(0).text());
+			
+			
+			 document.getElementById('playarea').innerHTML = mytext;
+			
+		  });
+		 
+		 
+		 initiate();
+
+	}
+	
+	
+function deleteClass(sel,cl){
+	var elems = document.querySelectorAll("fieldset, fieldset span");
+
+	[].forEach.call(elems, function(el) {
+		console.log("removing class:"+el.id);
+		el.classList.remove(cl);
+	});
+}
+	
+function undo(){
+	deckParent = deck.parentNode;
+	areaParent = area.parentNode;
+	deckParent.replaceChild(backupDeck, deck);
+	areaParent.replaceChild(backupArea, area);
+	
+	// redefine deck and area with new elements
+	area = document.getElementById("area");
+	deck = document.getElementById("deck");
+}
+
+
+/*
+*  dipsplay color around dest target
+*/
+function dragenter(ev){
+	console.log("entering:"+ev.target.nodeName+" id="+ev.target.id);
+	
+	//if (ev.target.style !== "undefined") ev.target.style.border = "thick solid #0000FF";
+	if (ev.target.classList !== "undefined") ev.target.classList.add("highlighted");
+	
+	
+}
+
+/*
+* cancel the color around the dest target (back to grey)
+*/
+function dragleave(ev){
+	
+	//if (ev.target.style !== "undefined") ev.target.style.border = "1px solid lightgrey";
+	if (ev.target.classList !== "undefined") ev.target.classList.remove("highlighted");
+}
+
+function restoreColor(dest){
+	
+	if (dest.classList !== "undefined") dest.classList.remove("highlighted");
+}
+	
+			var moved; // element being moved. Set by drag();
+		var from; // parent of the moved element. Set by drag();
+		
+function changeClass(dest){
+	area = document.getElementById("area");
+	if (dest === area) {
+		moved.className = "alone";
+		console.log ("moved id:"+moved.id+" now class: alone");
+	}else{
+		dest.className = "parent";
+		console.log ("dest id:"+dest.id+" now class: parent");
+		moved.className = "child";
+		console.log ("moved:"+moved.id+" now class: child");
+	};
+	fromF = from.querySelector("fieldset");
+	console.log(fromF);
+	if (fromF === null) {
+		from.className = "alone";
+	}else{
+		from.className = "parent";
+	}
+}		
+function allowDrop(ev) {
+  ev.preventDefault();
+}
+
+function drag(ev) {
+	backupDeck = document.getElementById("deck").cloneNode(true);
+	backupArea = document.getElementById("area").cloneNode(true);
+	moved = ev.target;
+	from = ev.target.parentNode;
+	console.log("startDRAG");
+	console.log(ev);
+	//ev.currentTarget.style.border = "dashed";
+  ev.dataTransfer.setData("text", ev.target.id);
+  console.log(ev.dataTransfer.getData("text"));
+}
+
+function drop(ev) {
+	console.log("startDROP");
+	
+	console.log(ev);
+  ev.preventDefault();
+  
+  restoreColor(ev.target);
+  
+  var data = ev.dataTransfer.getData("text");
+  if (ev.target.nodeName == "SPAN" || ev.target.nodeName == "LEGEND"){
+	console.log("forbid drop in span or legend=> drop in parent "+ev.target.parentNode.nodeName+" id:"+ev.target.parentNode.id);
+	
+   ev.target.parentNode.appendChild(document.getElementById(data));
+   changeClass(ev.target.parentNode);
+   }else{
+	console.log("Drop into:"+ev.target.nodeName);
+  ev.target.appendChild(document.getElementById(data));
+  changeClass(ev.target);
+  }
+  
+  //deleteClass("fieldset","highlighted");
+  
+}
+	
+	</script>
+	
+</head>
+
+<body onload="initiate();">
+
+<h1>Activité Classification</h1>
+Étape 1 - ORGANISATION
+	<ul>
+	<li>faites glisser les questions du jeu de carte dans la partie verte</li>
+	<li>Groupez les cartes en les déposant les unes sur les autres (aussi des sous-catégories)</li>
+	<li>Vous pouvez dégroupez les cartes en les déplaçants hors du groupe</li>
+	<li>Essayez de donner un nom aux catégories</li>
+	</ul>
+Étape 2 - CRÉATIVITÉ
+<ul>
+  <li>Utilisez les cartes sans titre pour ajouter à chaque groupe un exemple dans VOTRE matière</li>
+  <li>Ces cartes sans titres sont éditables. Vous pouvez conserver l'étoile pour signaler vos productions.</li>
+</ul>
+	<br clear="both"/>
+	<div id="playarea">
+			<div id="deck">
+    
+        <fieldset class="decked" id="field0-1" draggable="true" style="cursor:move" ondrop="drop(event);"  ondragover="allowDrop(event)"  ondragstart="drag(event)" ondragenter="dragenter(event)" ondragleave="dragleave(event)" >
+			<legend contenteditable="true">Renommez-moi</legend>
+			<span class="card" style="background:white;" contenteditable="true">⭐</span>
+		</fieldset>
+    
+    <fieldset class="decked" id="field0-2" draggable="true" style="cursor:move" ondrop="drop(event);"  ondragover="allowDrop(event)"  ondragstart="drag(event)" ondragenter="dragenter(event)" ondragleave="dragleave(event)" >
+			<legend contenteditable="true">Renommez-moi</legend>
+			<span class="card" style="background:white;" contenteditable="true">⭐</span>
+		</fieldset>
+    
+    <fieldset class="decked" id="field0-3" draggable="true" style="cursor:move" ondrop="drop(event);"  ondragover="allowDrop(event)"  ondragstart="drag(event)" ondragenter="dragenter(event)" ondragleave="dragleave(event)" >
+			<legend contenteditable="true">Renommez-moi</legend>
+			<span class="card" style="background:white;" contenteditable="true">⭐</span>
+		</fieldset>
+    
+    <fieldset class="decked" id="field0-4" draggable="true" style="cursor:move" ondrop="drop(event);"  ondragover="allowDrop(event)"  ondragstart="drag(event)" ondragenter="dragenter(event)" ondragleave="dragleave(event)" >
+			<legend contenteditable="true">Renommez-moi</legend>
+			<span class="card" style="background:white;" contenteditable="true">⭐</span>
+		</fieldset>
+    
+    
+		<fieldset class="decked" id="field1" draggable="true" style="cursor:move;"  ondrop="drop(event);"  ondragover="allowDrop(event)"   ondragstart="drag(event)" ondragenter="dragenter(event)" ondragleave="dragleave(event)" >
+					<legend contenteditable="true">Renommez-moi</legend>
+					<span class="card" style="background:white;">Combien fait 8+14?</span>
+				</fieldset>
+		<fieldset class="decked" id="field2" draggable="true" style="cursor:move" ondrop="drop(event);"  ondragover="allowDrop(event)"  ondragstart="drag(event)" ondragenter="dragenter(event)" ondragleave="dragleave(event)" >
+			<legend contenteditable="true">Renommez-moi</legend>
+			<span class="card" style="background:white;">Comment savez-vous que cette forme 🔺 est un triangle?</span>
+		</fieldset>
+		
+		
+		<fieldset class="decked" id="field3" draggable="true" style="cursor:move" ondrop="drop(event);"  ondragover="allowDrop(event)"  ondragstart="drag(event)" ondragenter="dragenter(event)" ondragleave="dragleave(event)" >
+			<legend contenteditable="true">Renommez-moi</legend>
+			<span class="card" style="background:white;">Pourquoi 8+14 et 14+8 donnent le même résultat?</span>
+		</fieldset>
+		
+		<fieldset class="decked" id="field4" draggable="true" style="cursor:move" ondrop="drop(event);"  ondragover="allowDrop(event)"  ondragstart="drag(event)" ondragenter="dragenter(event)" ondragleave="dragleave(event)" >
+			<legend contenteditable="true">Renommez-moi</legend>
+			<span class="card" style="background:white;">Qui peut me dire ce qu'est un vaisseau capillaire?</span>
+		</fieldset>
+		
+		
+		<fieldset class="decked" id="field5" draggable="true" style="cursor:move" ondrop="drop(event);"  ondragover="allowDrop(event)"  ondragstart="drag(event)" ondragenter="dragenter(event)" ondragleave="dragleave(event)" >
+			<legend contenteditable="true">Renommez-moi</legend>
+			<span class="card" style="background:white;">Quand vous êtes vous coupé le doigt pour la dernière fois?</span>
+		</fieldset>
+		
+		<fieldset class="decked" id="field6" draggable="true" style="cursor:move" ondrop="drop(event);"  ondragover="allowDrop(event)"  ondragstart="drag(event)" ondragenter="dragenter(event)" ondragleave="dragleave(event)" >
+			<legend contenteditable="true">Renommez-moi</legend>
+			<span class="card" style="background:white;">Qui sait à quoi sert le système veineux?</span>
+		</fieldset>
+		
+		<fieldset class="decked" id="field7" draggable="true" style="cursor:move" ondrop="drop(event);"  ondragover="allowDrop(event)"  ondragstart="drag(event)" ondragenter="dragenter(event)" ondragleave="dragleave(event)" >
+			<legend contenteditable="true">Renommez-moi</legend>
+			<span class="card" style="background:white;">Comment s'appelle cette forme 🔺 ? </span>
+		</fieldset>
+    
+    
+
+		
+	</div>
+		
+	<br clear="both"/>
+	<div id="menubar"><button id="undobtn" onclick="undo()" title="undo / annuler">↩</button>
+	<button  id="savebtn" title="download a backup / télécharger une sauvegarde" onclick="exportArea();">⤵</button>
+	<input type="file" id="uploadbtn" name="uploadbtn" class="inputfile" title="charger / uploader" onclick="importArea(event);"/>
+	<label id="inputfilelabel" for="uploadbtn" title="restore from a saved backup / restaurer à partir d'une sauvegarde">⤴</label>
+	</div>
+		<div id="areazone">
+			<div id="area"  ondrop="drop(event);" ondragover="allowDrop(event);">&nbsp;
+			
+			</div><!-- fin area	 -->
+		</div> <!-- fin areazone	 -->
+	</div><!-- fin playarea	 -->
+</body>
+</html>
